@@ -1,0 +1,230 @@
+{
+  "name": "ONTOLOGY_CORTEX_CODE",
+  "database_name": "SNOWFLAKE_INTELLIGENCE",
+  "schema_name": "AGENTS",
+  "owner": "ACCOUNTADMIN",
+  "comment": "",
+  "profile": {},
+  "agent_spec": {
+    "models": {
+      "orchestration": "auto"
+    },
+    "orchestration": {
+      "budget": {
+        "seconds": 900,
+        "tokens": 400000
+      }
+    },
+    "instructions": {
+      "response": "Provide concise, data-driven answers. For graph metrics, explain results in data context (e.g., 'high betweenness = key connector between customer account transaction and device context'). Use tables for multi-entity comparisons. Include data sources and confidence levels when relevant.",
+      "orchestration": "You are a specialized knowledge graph analyst that combines structured data querying with advanced graph analytics to answer complex questions about entities, relationships, and patterns.",
+      "sample_questions": [
+        {
+          "question": "What different types of customers can I search for in the database?"
+        },
+        {
+          "question": "Show me all the ways a customer can be connected to a account"
+        },
+        {
+          "question": "List everyone currently having a loan account"
+        },
+        {
+          "question": "Which customers have more than 1 account?"
+        },
+        {
+          "question": "Which customers have multiple accounts? Show me the partnerships."
+        },
+        {
+          "question": "which customer does the most transactions via which product?"
+        }
+      ]
+    },
+    "tools": [
+      {
+        "tool_spec": {
+          "type": "cortex_analyst_text_to_sql",
+          "name": "query_data",
+          "description": "Query structured data about customer, account, transaction and device entities using graph UDFs and Ontology classess created"
+        }
+      },
+      {
+        "tool_spec": {
+          "type": "cortex_analyst_text_to_sql",
+          "name": "query_ontology",
+          "description": "Query the abstract ontology layer that defines entity types, relationship types, and schema patterns in the knowledge graph." (use query_metadata_governance)"
+        }
+      },
+      {
+        "tool_spec": {
+          "type": "cortex_analyst_text_to_sql",
+          "name": "query_metadata_governance",
+          "description": "Query the metadata and governance layer for introspection into the semantic models, field definitions, data lineage, and coverage(use query_ontology)"
+        }
+      },
+      {
+        "tool_spec": {
+          "type": "generic",
+          "name": "centrality_tool",
+          "description": "Calculate network centrality metrics to identify the most important, influential, or strategically positioned entities in the knowledge graph.\n\nCentrality Metrics Available:\n- **Betweenness**.\n- **Degree**.\n- **Closeness**.\n- **Eigenvector**: Connected to other well-connected entities. High eigenvector = connected to influential entities.",
+          "input_schema": {
+            "type": "object",
+            "properties": {
+              "analysis_type": {
+                "description": "Type of centrality analysis (betweenness, closeness, degree, eigenvector)",
+                "type": "string"
+              },
+              "graph_type": {
+                "description": "Type of graph to analyze (customer or account)",
+                "type": "string"
+              },
+              "top_n": {
+                "description": "Number of top results to return",
+                "type": "number"
+              }
+            },
+            "required": [
+              "analysis_type",
+              "graph_type",
+              "top_n"
+            ]
+          }
+        }
+      },
+      {
+        "tool_spec": {
+          "type": "generic",
+          "name": "community_detection_tool",
+          "description": "Detect communities, clusters, and groups in the knowledge graph using the Louvain algorithm. Identifies tightly connected subgroups and hidden network structures.",
+          "input_schema": {
+            "type": "object",
+            "properties": {
+              "graph_type": {
+                "description": "Type of graph to analyze (customer or account)",
+                "type": "string"
+              }
+            },
+            "required": [
+              "graph_type"
+            ]
+          }
+        }
+      },
+      {
+        "tool_spec": {
+          "type": "generic",
+          "name": "shortest_path_tool",
+          "description": "Find the shortest path between two specific entities in the knowledge graph. Traces connections through intermediate entities to reveal relationship pathways.",
+          "input_schema": {
+            "type": "object",
+            "properties": {
+              "graph_type": {
+                "description": "Type of graph to analyze (customer or account)",
+                "type": "string"
+              },
+              "source_id": {
+                "description": "Source entity ID",
+                "type": "number"
+              },
+              "target_id": {
+                "description": "Target entity ID  ",
+                "type": "number"
+              }
+            },
+            "required": [
+              "graph_type",
+              "source_id",
+              "target_id"
+            ]
+          }
+        }
+      },
+{
+        "tool_spec": {
+          "type": "generic",
+          "name": "temporal_analysis_tool",
+          "description": "Analyze how the network evolves over time. Tracks changes in network structure across different time periods.",
+          "input_schema": {
+            "type": "object",
+            "properties": {
+              "analysis_type": {
+                "description": "Type of temporal analysis: 'evolution' (network changes over time) or 'trends'",
+                "type": "string"
+              },
+              "time_range": {
+                "description": "Time range for analysis (e.g., '2024-2025')",
+                "type": "string"
+              }
+            },
+            "required": [
+              "analysis_type",
+              "time_range"
+            ]
+          }
+        }
+      }
+    ],
+    "tool_resources": {
+      "centrality_tool": {
+        "execution_environment": {
+          "query_timeout": 180,
+          "type": "warehouse",
+          "warehouse": "COMPUTE_WH"
+        },
+        "identifier": "ONTOLOGY_DB.DATA_KG.CENTRALITY_TOOL",
+        "type": "function"
+      },
+      "community_detection_tool": {
+        "execution_environment": {
+          "query_timeout": 180,
+          "type": "warehouse",
+          "warehouse": "COMPUTE_WH"
+        },
+        "identifier": "ONTOLOGY_DB.DATA_KG.COMMUNITY_DETECTION_TOOL",
+        "type": "function"
+      },
+      "query_metadata_governance": {
+        "execution_environment": {
+          "query_timeout": 299,
+          "type": "warehouse",
+          "warehouse": "COMPUTE_WH"
+        },
+        "semantic_model_file": "@ONTOLOGY_DB.DATA_KG.SEMANTIC_MODELS/metadata_governance_model.yml"
+      },
+      "query_data": {
+        "execution_environment": {
+          "query_timeout": 299,
+          "type": "warehouse",
+          "warehouse": "COMPUTE_WH"
+        },
+        "semantic_model_file": "@ONTOLOGY_DB.DATA_KG.SEMANTIC_MODELS/semantic_model.yml"
+      },
+      "query_ontology": {
+        "execution_environment": {
+          "query_timeout": 299,
+          "type": "warehouse",
+          "warehouse": "COMPUTE_WH"
+        },
+        "semantic_model_file": "@ONTOLOGY_DB.DATA_KG.SEMANTIC_MODELS/semantic_model_ontology.yml"
+      },
+      "shortest_path_tool": {
+        "execution_environment": {
+          "query_timeout": 180,
+          "type": "warehouse",
+          "warehouse": "COMPUTE_WH"
+        },
+        "identifier": "ONTOLOGY_DB.DATA_KG.SHORTEST_PATH_TOOL",
+        "type": "function"
+      },
+      "temporal_analysis_tool": {
+        "execution_environment": {
+          "query_timeout": 180,
+          "type": "warehouse",
+          "warehouse": "COMPUTE_WH"
+        },
+        "identifier": "ONTOLOGY_DB.DATA_KG.TEMPORAL_ANALYSIS_TOOL",
+        "type": "function"
+      }
+    }
+  },
+  "created_on": "2026-06-23T16:44:11-06:00"
+}
