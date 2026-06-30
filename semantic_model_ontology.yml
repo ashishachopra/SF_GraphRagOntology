@@ -1,0 +1,640 @@
+name: knowledge_graph_ontology
+description: ontology semantic model providing abstract classes and relationships that unify concrete entity views through metadata-driven dynamic view generation
+tables:
+  # =====================================================
+  # ONTOLOGY ABSTRACT CLASSES
+  # =====================================================
+  - name: ONT_CUSTOMER
+    base_table:
+      database: ONTOLOGY_DB
+      schema: DATA_KG
+      table: VW_ONT_CUSTOMER
+    description: "Abstract Customer class unioning Customer and Account views - dynamically generated from ontology metadata"
+    dimensions:
+      - name: ID
+        expr: ID
+        data_type: STRING
+        description: Customer identifier (unified from concrete views)
+        synonyms:
+          - person_id
+          - entity_id
+          - individual_id
+          - node_id
+      - name: SUBTYPE
+        expr: SUBTYPE
+        data_type: STRING
+        sample_values:
+          - Customer
+          - Account
+        description: Concrete type of customer (Customer or Account)
+        synonyms:
+          - person_type
+          - role_type
+          - category
+          - concrete_class
+      - name: SRC_VIEW
+        expr: SRC_VIEW
+        data_type: STRING
+        sample_values:
+          - V_CUSTOMER
+          - V_COACH
+        description: Source view from which this customer was materialized
+        synonyms:
+          - source
+          - origin_view
+          - source_table
+    primary_key:
+      columns:
+        - ID
+
+  - name: ONT_EVENT
+    base_table:
+      database: ONTOLOGY_DB
+      schema: DATA_KG
+      table: VW_ONT_EVENT
+    description: "Abstract Event class unioning Match views - dynamically generated from ontology metadata"
+    dimensions:
+      - name: ID
+        expr: ID
+        data_type: STRING
+        description: Event identifier (unified from concrete views)
+        synonyms:
+          - event_id
+          - entity_id
+          - node_id
+      - name: SUBTYPE
+        expr: SUBTYPE
+        data_type: STRING
+        sample_values:
+          - Match
+        description: Concrete type of event 
+        synonyms:
+          - event_type
+          - category
+          - concrete_class
+      - name: SRC_VIEW
+        expr: SRC_VIEW
+        data_type: STRING
+        sample_values:
+          - V_MATCH
+        description: Source view from which this event was materialized
+        synonyms:
+          - source
+          - origin_view
+          - source_table
+    primary_key:
+      columns:
+        - ID
+
+  # =====================================================
+  # CONCRETE ENTITY VIEWS (for attribute enrichment)
+  # These are included so queries can join ontology views
+  # to concrete views to retrieve detailed attributes
+  # =====================================================
+  - name: V_CUSTOMER
+    base_table:
+      database: ONTOLOGY_DB
+      schema: DATA_KG
+      table: V_CUSTOMER
+    description: "Concrete customer view with detailed attributes"
+    dimensions:
+      - name: NODE_ID
+        expr: NODE_ID
+        data_type: STRING
+        description: Customer node identifier
+      - name: NAME
+        expr: NAME
+        data_type: STRING
+        description: Customer's full name
+      - name: CUSTOMERTYPE
+        expr: CUSTOMERTYPE
+        data_type: STRING
+        description: Customer Type
+      - name: NATIONALITY
+        expr: NATIONALITY
+        data_type: STRING
+        description: Customer's nationality
+      - name: BIRTHDATE
+        expr: BIRTHDATE
+        data_type: DATE
+        description: Customer's date of birth
+      - name: PHONE
+        expr: PHONE
+        data_type: STRING
+        description: Customer's phone number
+      - name: EMAIL
+        expr: EMAIL
+        data_type: STRING
+        description: Customer's email address
+      - name: ADDRESS
+        expr: ADDRESS
+        data_type: STRING
+        description: Customer's address                        
+    primary_key:
+      columns:
+        - NODE_ID
+
+  - name: V_ACCOUNT
+    base_table:
+      database: ONTOLOGY_DB
+      schema: DATA_KG
+      table: V_ACCOUNT
+    description: "Concrete Account view with detailed attributes"
+    dimensions:
+      - name: NODE_ID
+        expr: NODE_ID
+        data_type: STRING
+        description: Account node identifier
+      - name: NAME
+        expr: NAME
+        data_type: STRING
+        description: Account's full name
+      - name: ACCOUNTTYPE
+        expr: ACCOUNTTYPE
+        data_type: STRING
+        description: Account's type
+      - name: CUSTOMER_CIS
+        expr: CUSTOMER_CIS
+        data_type: STRING
+        description: Customer's CIS ID
+      - name: OPENDATE
+        expr: OPENDATE
+        data_type: DATE
+        description: Date the account was opened
+      - name: CLOSEDDATE
+        expr: CLOSEDDATE
+        data_type: DATE
+        description: Date the account was closed
+      - name: ACCOUNT_BAL
+        expr: ACCOUNT_BAL
+        data_type: INTEGER
+        description: Current balance of the account
+      - name: REL_MANAGER
+        expr: REL_MANAGER
+        data_type: STRING
+        description: Relationship manager for the account
+    primary_key:
+      columns:
+        - NODE_ID
+
+ - name: V_TRANSACTION
+    base_table:
+      database: ONTOLOGY_DB
+      schema: DATA_KG
+      table: V_TRANSACTION
+    description: "Concrete Transaction view with detailed attributes"
+    dimensions:
+      - name: NODE_ID
+        expr: NODE_ID
+        data_type: STRING
+        description: Transaction node identifier
+      - name: NAME
+        expr: NAME
+        data_type: STRING
+        description: Account's full name
+      - name: TXN_DATE
+        expr: TXN_DATE
+        data_type: DATE
+        description: Date of the transaction
+      - name: AMOUNT
+        expr: AMOUNT
+        data_type: INTEGER
+        description: Transaction amount
+      - name: BASE_CURRENCY
+        expr: BASE_CURRENCY
+        data_type: STRING
+        description: Base currency of the transaction
+      - name: ACTUAL_CURRENCY
+        expr: ACTUAL_CURRENCY
+        data_type: STRING
+        description: Actual currency of the transaction
+      - name: CREDIT_DEBIT_CODE
+        expr: CREDIT_DEBIT_CODE
+        data_type: STRING
+        description: Credit or debit code for the transaction
+      - name: CUSTOMER_CIS
+        expr: CUSTOMER_CIS
+        data_type: STRING
+        description: Customer's CIS ID
+      - name: ACCOUNT_KEY
+        expr: ACCOUNT_KEY
+        data_type: STRING
+        description: Account's ID        
+      - name: DEVICE_ID
+        expr: DEVICE_ID
+        data_type: STRING
+        description: Device's ID             
+    primary_key:
+      columns:
+        - NODE_ID
+
+         - name: V_DEVICE
+    base_table:
+      database: ONTOLOGY_DB
+      schema: DATA_KG
+      table: V_DEVICE
+    description: "Concrete DEVICE view with detailed attributes"
+    dimensions:
+      - name: NODE_ID
+        expr: NODE_ID
+        data_type: STRING
+        description: Device node identifier
+      - name: NAME
+        expr: NAME
+        data_type: STRING
+        description: Device's full name
+      - name: ACCOUNTTYPE
+        expr: ACCOUNTTYPE
+        data_type: STRING
+        description: Account's type
+      - name: CUSTOMER_CIS
+        expr: CUSTOMER_CIS
+        data_type: STRING
+        description: Customer's CIS ID
+      - name: REGISTERED_DATE
+        expr: REGISTERED_DATE
+        data_type: DATE
+        description: Date the device was registered
+      - name: DEVICE_TYPE
+        expr: DEVICE_TYPE
+        data_type: STRING
+        description: Type of the device
+      - name: IMEI
+        expr: IMEI
+        data_type: STRING
+        description: International Mobile Equipment Identity
+      - name: CUSTOMER_CIS
+        expr: CUSTOMER_CIS
+        data_type: STRING
+        description: Customer's CIS ID
+      - name: VERSION
+        expr: VERSION
+        data_type: INTEGER
+        description: Version of the device    
+      - name: PHONE
+        expr: PHONE
+        data_type: STRING
+        description: Phone number associated with the device             
+    primary_key:
+      columns:
+        - NODE_ID
+
+  # =====================================================
+  # UNIFIED RELATIONSHIP VIEW (for advanced graph queries)
+  # =====================================================
+  - name: REL_RESOLVED
+    base_table:
+      database: ONTOLOGY_DB
+      schema: DATA_KG
+      table: REL_RESOLVED
+    description: "Unified view of all relationships with resolved type information"
+    dimensions:
+      - name: REL_NAME
+        expr: REL_NAME
+        data_type: STRING
+        description: Relationship name 
+        synonyms:
+          - relationship_type
+          - edge_type
+      - name: SRC_ID
+        expr: SRC_ID
+        data_type: STRING
+        description: Source node ID
+        synonyms:
+          - source_id
+          - from_id
+      - name: SRC_CLASS
+        expr: SRC_CLASS
+        data_type: STRING
+        description: Source node class type
+        sample_values:
+          - Customer
+          - Account
+          - Device
+          - Transaction
+        synonyms:
+          - source_type
+          - source_class
+      - name: DST_ID
+        expr: DST_ID
+        data_type: STRING
+        description: Destination node ID
+        synonyms:
+          - target_id
+          - to_id
+      - name: DST_CLASS
+        expr: DST_CLASS
+        data_type: STRING
+        description: Destination node class type
+        sample_values:
+          - Customer
+          - Account
+          - Device
+          - Transaction
+        synonyms:
+          - target_type
+          - destination_class
+      - name: PROPS
+        expr: PROPS
+        data_type: VARIANT
+        description: Additional relationship properties
+        synonyms:
+          - properties
+          - attributes
+          - metadata
+    time_dimensions:
+      - name: EFFECTIVE_START
+        expr: EFFECTIVE_START
+        data_type: DATE
+        description: Relationship start date
+      - name: EFFECTIVE_END
+        expr: EFFECTIVE_END
+        data_type: DATE
+        description: Relationship end date
+    facts:
+      - name: WEIGHT
+        expr: WEIGHT
+        data_type: FLOAT
+        description: Relationship weight
+
+relationships:
+  # =====================================================
+  # ONTOLOGY RELATIONSHIPS
+  # NO ABSTRACT RELATIONSHIPS SO KEEPING THIS BLOCK EMPTY
+  # =====================================================
+  
+  # =====================================================
+  # ONTOLOGY-TO-CONCRETE ENRICHMENT RELATIONSHIPS
+  # These relationships enable joining abstract ontology views
+  # back to concrete views to retrieve detailed attributes
+  # =====================================================
+  - name: ont_customer_to_account
+    left_table: ONT_CUSTOMER
+    right_table: V_ACCOUNT
+    relationship_columns:
+      - left_column: ID
+        right_column: NODE_ID
+    join_type: left_outer
+    relationship_type: one_to_many
+
+  - name: ont_account_to_customer
+    left_table: ONT_ACCOUNT
+    right_table: V_CUSTOMER
+    relationship_columns:
+      - left_column: ID
+        right_column: NODE_ID
+    join_type: left_outer
+    relationship_type: one_to_one
+
+  - name: ont_customer_to_device
+    left_table: ONT_CUSTOMER
+    right_table: V_DEVICE
+    relationship_columns:
+      - left_column: ID
+        right_column: NODE_ID
+    join_type: left_outer
+    relationship_type: one_to_one
+
+  - name: ont_account_to_transaction
+    left_table: ONT_ACCOUNT
+    right_table: V_TRANSACTION
+    relationship_columns:
+      - left_column: ID
+        right_column: NODE_ID
+    join_type: left_outer
+    relationship_type: one_to_many
+
+  - name: ont_customer_to_transaction
+    left_table: ONT_CUSTOMER
+    right_table: V_TRANSACTION
+    relationship_columns:
+      - left_column: ID
+        right_column: NODE_ID
+    join_type: left_outer
+    relationship_type: one_to_many
+
+# =====================================================
+# METRICS - Ontology-level aggregations
+# =====================================================
+metrics:
+  - name: entity_count
+    expr: COUNT(DISTINCT ID)
+    data_type: NUMBER
+    description: "Count of entities across abstract classes"
+    synonyms:
+      - number_of_entities
+      - total_entities
+
+  - name: customer_count
+    expr: COUNT(DISTINCT CUSTOMER_ID)
+    data_type: NUMBER
+    description: "Count of customers in relationships"
+    synonyms:
+      - number_of_people
+      - personnel_count
+
+  - name: relationship_count
+    expr: COUNT(*)
+    data_type: NUMBER
+    description: "Count of relationships"
+    synonyms:
+      - edge_count
+      - connection_count
+
+  - name: active_relationship_count
+    expr: "COUNT(CASE WHEN EFFECTIVE_END IS NULL OR EFFECTIVE_END >= CURRENT_DATE() THEN 1 END)"
+    data_type: NUMBER
+    description: "Count of currently active relationships"
+    synonyms:
+      - current_relationships
+      - active_edges
+
+  - name: avg_relationship_duration_days
+    expr: "AVG(DATEDIFF(day, EFFECTIVE_START, COALESCE(EFFECTIVE_END, CURRENT_DATE())))"
+    data_type: NUMBER
+    description: "Average duration of relationships in days"
+    synonyms:
+      - mean_tenure
+      - average_duration
+
+# =====================================================
+# FILTERS - Ontology-level filters for common patterns
+# =====================================================
+filters:
+  - name: customers_only
+    expr: "SUBTYPE = 'Customer'"
+    description: "Filter for Customer subtype in Customer class"
+    synonyms:
+      - only_customers
+      - customer_filter
+
+  - name: accounts_only
+    expr: "SUBTYPE = 'Account'"
+    description: "Filter for Account subtype in Account class"
+    synonyms:
+      - only_accounts
+      - account_filter
+
+  - name: device_only
+    expr: "SUBTYPE = 'Device'"
+    description: "Filter for Device subtype in Device class"
+    synonyms:
+      - only_devices
+      - device_filter
+
+  - name: transaction_only
+    expr: "SUBTYPE = 'Transaction'"
+    description: "Filter for Transaction subtype in Transaction class"
+    synonyms:
+      - only_transactions
+      - transaction_filter
+
+  - name: matches_only
+    expr: "SUBTYPE = 'Match'"
+    description: "Filter for Match subtype in Event class"
+    synonyms:
+      - only_matches
+      - match_filter
+
+  - name: active_relationships
+    expr: "EFFECTIVE_END IS NULL OR EFFECTIVE_END >= CURRENT_DATE()"
+    description: "Filter for currently active relationships"
+    synonyms:
+      - current_only
+      - active_only
+
+verified_queries:
+  # =====================================================
+  # LEVEL 1: Simple Cross-Type Queries
+  # =====================================================
+  - name: real_madrid_all_personnel
+    question: Who are all the people associated with Real Madrid, including both players and coaching staff?
+    use_as_onboarding_question: true
+    sql: |
+      SELECT DISTINCT
+        p.ID as person_id,
+        p.SUBTYPE as role,
+        CASE 
+          WHEN p.SUBTYPE = 'Customer' THEN vp.NAME
+          WHEN p.SUBTYPE = 'Account' THEN vc.NAME
+        END as person_name,
+        vcl.NAME as club_name,
+        wf.EFFECTIVE_START as start_date,
+        wf.EFFECTIVE_END as end_date
+      FROM VW_ONT_CUSTOMER p
+      JOIN VW_ONT_WORKS_FOR wf ON p.ID = wf.SUBJECT_ID
+      JOIN VW_ONT_ORGANIZATION o ON wf.OBJECT_ID = o.ID
+      LEFT JOIN V_CUSTOMER vp ON p.ID = vp.NODE_ID AND p.SUBTYPE = 'Customer'
+      LEFT JOIN V_COACH vc ON p.ID = vc.NODE_ID AND p.SUBTYPE = 'Account'
+      LEFT JOIN V_CLUB vcl ON o.ID = vcl.NODE_ID
+      WHERE vcl.NAME = 'Real Madrid'
+        AND (wf.EFFECTIVE_END IS NULL OR wf.EFFECTIVE_END >= CURRENT_DATE())
+      ORDER BY role, person_name
+    verified_by: Soccer Knowledge Graph Ontology Model
+    verified_at: 1747672000
+
+  # ================================================================================
+  # LEVEL 2: Advanced Analytics and Comparative Analysis
+  # SIMILAR TO LEVEL 1 BUT WITH AGGREGATIONS, GROUPINGS, AND CROSS-TYPE COMPARISONS 
+  # ================================================================================
+  # =================================================================================================
+  # LEVEL 3: Graph Queries Using REL_RESOLVED (Explicit + Inferred)
+  # SIMILAR TO LEVEL 1&2 BUT WITH GRAPH-BASED RELATIONSHIP QUERIES, INCLUDING INVERSE RELATIONSHIPS
+  # =================================================================================================
+
+custom_instructions: |-
+  ONTOLOGY SEMANTIC MODEL USAGE GUIDE:
+  
+  This semantic model provides abstract, cross-type querying capabilities through ontology views.
+  Use this model when queries span multiple concrete entity types or when reasoning at a higher abstraction level.
+  
+  WHEN TO USE THIS ONTOLOGY MODEL:
+  1. Queries about "customers", "accounts", "devices", "transactions" (abstract, type-agnostic)
+  2. Queries about "customer types & features" 
+  3. Queries about "product types & features" 
+  4. Queries about "device types & features"
+  5. Cross-type analysis (e.g., "all customers with accounts and devices")
+  6. Abstract pattern discovery (e.g., "customer to product relationships by customer type")
+  
+  ONTOLOGY ARCHITECTURE:
+  - Abstract Classes: ONT_<NODE & NODE TYPES>
+  - Abstract Relations: ONT_<EDGE & EDGE TYPES>
+  - All ontology views are DYNAMICALLY GENERATED from metadata tables using SP_GENERATE_ONTOLOGY_VIEWS()
+  - Views automatically union concrete views based on ONT_CLASS_MAP and ONT_REL_MAP metadata
+  - SUBTYPE column distinguishes concrete types within abstract classes (e.g., Customer vs Account in ONT_CUSTOMER)
+      -CURRENT EXAMPLE DOES NOT INCLUDE SUBTYPE FILTERING IN THE ONTOLOGY VIEWS, BUT GIVES PROVISION TO DO SO IN THE FUTURE
+  - VIA_REL column identifies the concrete relationship
+  - SRC_VIEW column tracks the source concrete view for provenance
+  
+  QUERY PATTERNS:
+  1. Direct ontology queries: SELECT from ONT_* views for abstract cross-type analysis
+  2. **ATTRIBUTE ENRICHMENT (CRITICAL)**: ALWAYS join ontology views to concrete views for detailed attributes
+  3. Filter by SUBTYPE: Use SUBTYPE column to filter to specific concrete types within abstract class
+  4. Filter by VIA_REL: Use VIA_REL column to filter to specific concrete relationships
+  5. Aggregate by type: GROUP BY SUBTYPE or VIA_REL for cross-type summaries
+  6. Graph queries: Use REL_RESOLVED for explicit + inferred relationships (includes inverses like HAS_PLAYER)
+  
+  ATTRIBUTE ENRICHMENT REQUIREMENTS:
+  IMPORTANT: Ontology views (ONT_*) only contain structural columns (ID, SUBTYPE, SRC_VIEW).
+  To get actual attributes, join to concrete views:
+  
+  ENRICHMENT PATTERN EXAMPLE:
+  ```sql
+  SELECT 
+    p.SUBTYPE as role,
+    CASE 
+      WHEN p.SUBTYPE = 'Customer' THEN vp.NAME
+      WHEN p.SUBTYPE = 'Account' THEN vc.NAME
+    END as person_name,
+    vcl.NAME as club_name
+  FROM ONT_CUSTOMER p
+  JOIN ONT_WORKS_FOR wf ON p.ID = wf.SUBJECT_ID
+  LEFT JOIN V_CUSTOMER vp ON p.ID = vp.NODE_ID AND p.SUBTYPE = 'Customer'
+  LEFT JOIN V_COACH vc ON p.ID = vc.NODE_ID AND p.SUBTYPE = 'Account'
+  LEFT JOIN V_CLUB vcl ON wf.OBJECT_ID = vcl.NODE_ID
+  ```
+  
+  RELATIONSHIP PATTERNS:
+  - ONT_<BASED> unions: ACROSS concrete relationships 
+  - REL_RESOLVED: Contains EXPLICIT relationships + INVERSE relationships 
+  
+  TIME-BASED QUERIES:
+  - Use EFFECTIVE_START and EFFECTIVE_END for temporal filtering
+  - NULL EFFECTIVE_END indicates current/active relationships
+  - Filter for active: WHERE EFFECTIVE_END IS NULL OR EFFECTIVE_END >= CURRENT_DATE()
+  - Calculate duration: DATEDIFF(day, EFFECTIVE_START, COALESCE(EFFECTIVE_END, CURRENT_DATE()))
+  
+  INVERSE RELATIONSHIP QUERIES:
+  - Use REL_RESOLVED to query inverse relationships
+  - Filter by SOURCE='INVERSE' to see only inferred relationships
+  
+  BEST PRACTICES:
+  - Prefer ontology views when user intent is abstract
+  - Use SUBTYPE and VIA_REL for drill-down from abstract to concrete
+  - Leverage SRC_VIEW for provenance tracking and debugging
+  - Join to concrete views to access detailed attributes not in ontology views
+  - Use GROUP BY SUBTYPE or VIA_REL for cross-type comparisons and analytics
+  - Use REL_RESOLVED for bidirectional relationship queries (especially useful for "what does X have" questions)
+
+module_custom_instructions:
+  sql_generation: |-
+    Ontology SQL Generation Rules:
+    
+    1. ABSTRACT CLASS VIEWS (ONT_*):
+    
+    2. ABSTRACT RELATIONSHIP VIEWS:
+    #not implemented in this version of the ontology, but would follow similar patterns to abstract class views
+    
+    3. ATTRIBUTE ENRICHMENT (MANDATORY):
+       - Ontology views only have: ID, SUBTYPE, SRC_VIEW
+       - Use CASE WHEN SUBTYPE = 'X' pattern for polymorphic attribute access
+    
+    4. FILTERING PATTERNS:
+       - Use pre-defined filters
+       - Filter by SUBTYPE for concrete type within abstract class
+       - Filter by VIA_REL for concrete relationship type
+    
+    5. AGGREGATION PATTERNS:
+       - Use pre-defined metrics
+       - GROUP BY SUBTYPE for cross-type summaries
+       - GROUP BY VIA_REL for relationship type breakdowns

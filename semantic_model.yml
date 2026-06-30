@@ -1,0 +1,769 @@
+name: knowledge_graph_v2
+description: knowledge graph model using node-edge architecture with convenience views for natural language querying
+tables:
+  # =====================================================
+  # CONVENIENCE ENTITY VIEWS
+  # =====================================================
+  - name: V_CUSTOMER
+    base_table:
+      database: ONTOLOGY_DB
+      schema: DATA_KG
+      table: V_CUSTOMER
+    description: "View of all customers with extracted properties from KG_NODE"
+    dimensions:
+      - name: NODE_ID
+        expr: NODE_ID
+        data_type: STRING
+        description: Customer node identifier
+        synonyms:
+          - customer_id
+          - node_key
+          - entity_id
+      - name: NAME
+        expr: NAME
+        data_type: STRING
+        sample_values:
+          - "Kylian Mbappé"
+          - "Erling Haaland"
+          - "Jude Bellingham"
+        description: Customer's full name
+        synonyms:
+          - customer_name
+          - full_name
+          - name
+      - name: CUSTOMERTYPE
+        expr: CUSTOMERTYPE
+        data_type: STRING
+        sample_values:
+          - Individual
+          - Business
+        description: Customer type
+        synonyms:
+          - customer_category
+          - client_type
+          - user_type
+      - name: NATIONALITY
+        expr: NATIONALITY
+        data_type: STRING
+        sample_values:
+          - France
+          - Norway
+          - England
+        description: Customer's nationality
+        synonyms:
+          - country
+          - origin
+          - citizenship
+          - nation
+      - name: BIRTHDATE
+        expr: BIRTHDATE
+        data_type: DATE
+        sample_values:
+          - '1998-12-20'
+          - '2000-07-21'
+          - '2003-06-29'
+        description: Customer's date of birth
+        synonyms:
+          - birth_date
+          - dob
+          - date_of_birth
+      - name: PROPS
+        expr: PROPS
+        data_type: VARIANT
+        description: Additional customer properties
+        synonyms:
+          - properties
+          - attributes
+          - metadata
+    primary_key:
+      columns:
+        - NODE_ID
+
+  - name: V_ACCOUNT
+    base_table:
+      database: ONTOLOGY_DB
+      schema: DATA_KG
+      table: V_ACCOUNT
+    description: "View of all accounts with extracted properties from KG_NODE"
+    dimensions:
+      - name: NODE_ID
+        expr: NODE_ID
+        data_type: STRING
+        description: Account node identifier
+        synonyms:
+          - account_id
+          - node_key
+          - entity_id
+      - name: NAME
+        expr: NAME
+        data_type: STRING
+        sample_values:
+          - "Carlo Ancelotti"
+          - "Pep Guardiola"
+          - "Mikel Arteta"
+        description: Account holders full name
+        synonyms:
+          - account_name
+          - full_name
+          - name
+      - name: ACCOUNTTYPE
+        expr: ACCOUNTTYPE
+        data_type: STRING
+        sample_values:
+          - Individual
+          - Business
+        description: Account type
+        synonyms:
+          - customer_type
+          - client_type
+          - user_type
+          - account_type
+      - name: CUSTOMER_CIS
+        expr: CUSTOMER_CIS
+        data_type: STRING
+        sample_values:
+          - CIS12345
+          - CIS67890
+          - CIS54321
+        description: Customer's CIS identifier
+        synonyms:
+          - customer_cis
+          - cis_id
+      - name: PROPS
+        expr: PROPS
+        data_type: VARIANT
+        description: Additional account properties
+        synonyms:
+          - properties
+          - attributes
+          - metadata
+    primary_key:
+      columns:
+        - NODE_ID
+
+  - name: V_DEVICE
+    base_table:
+      database: ONTOLOGY_DB
+      schema: DATA_KG
+      table: V_DEVICE
+    description: "View of all devices with extracted properties from KG_NODE"
+    dimensions:
+      - name: NODE_ID
+        expr: NODE_ID
+        data_type: STRING
+        description: Device node identifier
+        synonyms:
+          - device_id
+          - node_key
+          - entity_id
+      - name: NAME
+        expr: NAME
+        data_type: STRING
+        sample_values:
+          - "Samsung Galaxy S21"
+          - "iPhone 13"
+          - "iPad Pro"
+        description: Device's official name
+        synonyms:
+          - device_name
+          - name
+      - name: CUSTOMER_CIS
+        expr: CUSTOMER_CIS
+        data_type: STRING
+        sample_values:
+          - CIS12345
+          - CIS67890
+          - CIS54321
+        description: Customer's CIS identifier
+        synonyms:
+          - customer_cis
+          - cis_id
+      - name: PROPS
+        expr: PROPS
+        data_type: VARIANT
+        description: Additional device properties
+        synonyms:
+          - properties
+          - attributes
+          - metadata
+    primary_key:
+      columns:
+        - NODE_ID
+
+  - name: V_TRANSACTION
+    base_table:
+      database: ONTOLOGY_DB
+      schema: DATA_KG
+      table: V_TRANSACTION
+    description: "View of all transactions with extracted properties from KG_NODE"
+    dimensions:
+      - name: NODE_ID
+        expr: NODE_ID
+        data_type: STRING
+        description: Transaction node identifier
+        synonyms:
+          - transaction_id
+          - node_key
+          - entity_id
+      - name: NAME
+        expr: NAME
+        data_type: STRING
+        sample_values:
+          - "Payment to Amazon"
+          - "Online Purchase"
+          - "Subscription Fee"
+        description: Transaction description or title
+        synonyms:
+          - transaction_name 
+          - name
+      - name: TXN_DATE
+        expr: TXN_DATE
+        data_type: DATE
+        sample_values:
+          - '2025-10-25'
+          - '2025-11-05'
+          - '2025-11-06'
+        description: Date when the transaction occurred
+        synonyms:
+          - transaction_date
+          - date
+      - name: AMOUNT
+        expr: AMOUNT
+        data_type: INTEGER
+        sample_values:
+          - 100
+          - 250
+          - 500
+        description: Transaction amount
+        synonyms:
+          - transaction_amount
+          - value
+      - name: BASE_CURRENCY
+        expr: BASE_CURRENCY
+        data_type: STRING
+        sample_values:
+          - USD
+          - EUR
+          - GBP
+        description: Base currency for the transaction
+        synonyms:
+          - currency
+          - money_type
+      - name: PROPS
+        expr: PROPS
+        data_type: VARIANT
+        description: Additional match properties
+        synonyms:
+          - properties
+          - attributes
+          - metadata
+    facts:
+      - name: CUSTOMER_CIS
+        expr: CUSTOMER_CIS
+        data_type: STRING
+        sample_values:
+          - CIS12345
+          - CIS67890
+          - CIS54321
+        description: Customer's CIS identifier
+        synonyms:
+          - customer_cis
+          - cis_id
+      - name: ACCOUNT_KEY
+        expr: ACCOUNT_KEY
+        data_type: STRING
+        sample_values:
+          - ACC12345
+          - ACC67890
+          - ACC54321
+        description: Account key for the transaction
+        synonyms:
+          - account_id
+          - account_number
+      - name: DEVICE_ID
+        expr: DEVICE_ID
+        data_type: STRING
+        sample_values:
+          - DEV12345
+          - DEV67890
+          - DEV54321
+        description: Device identifier
+        synonyms:
+          - device_id
+          - product_id
+    primary_key:
+      columns:
+        - NODE_ID
+
+  # =====================================================
+  # RELATIONSHIP VIEWS
+  # CUST_OWNS_PRODUCT | PRODUCT_TRANSACTIONS | CUSTOMER_TRANSACTIONS | CUSTOMER_DEVICE
+  # =====================================================
+  - name: CUST_OWNS_PRODUCT
+    base_table:
+      database: ONTOLOGY_DB
+      schema: DATA_KG
+      table: CUST_OWNS_PRODUCT
+    description: "View of customer-to-product relationships with extracted properties"
+    dimensions:
+      - name: ACCOUNT_ID
+        expr: ACCOUNT_ID
+        data_type: STRING
+        description: Account identifier
+        synonyms:
+          - account_id
+          - source_id
+          - account_key
+      - name: CUSTOMER_ID
+        expr: CUSTOMER_ID
+        data_type: STRING
+        description: Customer node identifier
+        synonyms:
+          - customer_node_id
+          - target_id
+      - name: PRODUCT_TYPE
+        expr: PRODUCT_TYPE
+        data_type: STRING
+        sample_values:
+          - PRODUCT_TYPE
+        description: Type of relationship
+        synonyms:
+          - relationship_type
+          - link_type
+          - connection_type
+      - name: PROPS
+        expr: PROPS
+        data_type: VARIANT
+        description: Additional relationship properties
+        synonyms:
+          - properties
+          - attributes
+          - metadata
+    time_dimensions:
+      - name: EFFECTIVE_START
+        expr: EFFECTIVE_START
+        data_type: DATE
+        description: Start date of the contract
+        synonyms:
+          - start_date
+          - begin_date
+          - contract_start
+      - name: EFFECTIVE_END
+        expr: EFFECTIVE_END
+        data_type: DATE
+        description: End date of the contract
+        synonyms:
+          - end_date
+          - expiry_date
+          - contract_end
+    facts:
+      - name: PRODUCT_FEATURES 
+        expr: PRODUCT_FEATURES
+        data_type: STRING
+        description: Features of the product
+        synonyms:
+          - features
+    primary_key:
+      columns:
+        - ACCOUNT_ID
+        - CUSTOMER_ID
+        - EFFECTIVE_START
+
+  - name: V_CUST_DEVICE_OWNED
+    base_table:
+      database: ONTOLOGY_DB
+      schema: DATA_KG
+      table: V_CUST_DEVICE_OWNED
+    description: "View of customer-to-device relationships with extracted properties"
+    dimensions:
+      - name: DEVICE_ID
+        expr: DEVICE_ID
+        data_type: STRING
+        description: Device node identifier
+        synonyms:
+          - device_node_id
+          - source_id
+          - device_key
+      - name: CUSTOMER_ID
+        expr: CUSTOMER_ID
+        data_type: STRING
+        description: Customer node identifier
+        synonyms:
+          - customer_node_id
+          - target_id
+          - customer_key
+      - name: EDGE_TYPE
+        expr: EDGE_TYPE
+        data_type: STRING
+        sample_values:
+          - DEVICE_TYPE
+        description: Type of relationship
+        synonyms:
+          - relationship_type
+          - link_type
+          - connection_type
+      - name: PROPS
+        expr: PROPS
+        data_type: VARIANT
+        description: Additional relationship properties
+        synonyms:
+          - properties
+          - attributes
+          - metadata
+    time_dimensions:
+      - name: EFFECTIVE_START
+        expr: EFFECTIVE_START
+        data_type: DATE
+        description: Start date of the contract
+        synonyms:
+          - start_date
+          - begin_date
+          - contract_start
+      - name: EFFECTIVE_END
+        expr: EFFECTIVE_END
+        data_type: DATE
+        description: End date of the contract
+        synonyms:
+          - end_date
+          - expiry_date
+          - contract_end
+    facts:
+      - name: DEVICE_FEATURES
+        expr: DEVICE_FEATURES
+        data_type: STRING
+        description: Features of the device
+        synonyms:
+          - features
+    primary_key:
+      columns:
+        - DEVICE_ID
+        - CUSTOMER_ID
+        - EFFECTIVE_START
+
+  - name: V_CUST_TXN_DONE
+    base_table:
+      database: ONTOLOGY_DB
+      schema: SOCCER_KG
+      table: V_CUST_TXN_DONE
+    description: "View of customer to transactions relationships with performance statistics"
+    dimensions:
+      - name: TXN_ID
+        expr: TXN_ID
+        data_type: STRING
+        description: Transaction node identifier
+        synonyms:
+          - transaction_node_id
+          - source_id
+      - name: CUSTOMER_ID
+        expr: CUSTOMER_ID
+        data_type: STRING
+        description: Customer node identifier
+        synonyms:
+          - customer_node_id
+          - target_id
+          - match_key
+      - name: EDGE_TYPE
+        expr: EDGE_TYPE
+        data_type: STRING
+        sample_values:
+          - TXN_TYPE
+        description: Transaction Type of relationship
+        synonyms:
+          - relationship_type
+          - link_type
+          - connection_type
+      - name: PROPS
+        expr: PROPS
+        data_type: VARIANT
+        description: Additional relationship properties
+        synonyms:
+          - properties
+          - attributes
+          - metadata
+    time_dimensions:
+      - name: EFFECTIVE_START
+        expr: EFFECTIVE_START
+        data_type: DATE
+        description: Start date of the appearance
+        synonyms:
+          - start_date
+          - begin_date
+          - appearance_start
+      - name: EFFECTIVE_END
+        expr: EFFECTIVE_END
+        data_type: DATE
+        description: End date of the appearance
+        synonyms:
+          - end_date
+          - expiry_date
+          - appearance_end
+    facts:
+      - name: TXN_FEATURES
+        expr: TXN_FEATURES
+        data_type: STRING
+        description: Transaction features
+        synonyms:
+          - transaction_features
+          - txn_properties
+    primary_key:
+      columns:
+        - PLAYER_ID
+        - MATCH_ID
+        - EFFECTIVE_START
+
+  - name: V_PRODUCT_TXN_DONE
+    base_table:
+      database: ONTOLOGY_DB
+      schema: DATA_KG
+      table: V_PRODUCT_TXN_DONE
+    description: "View of product-to-transaction relationships"
+    dimensions:
+      - name: PRODUCT_ID
+        expr: PRODUCT_ID
+        data_type: STRING
+        description: Product node identifier
+        synonyms:
+          - product_node_id
+          - source_id
+          - product_key
+      - name: ACCOUNT_ID
+        expr: ACCOUNT_ID
+        data_type: STRING
+        description: Account node identifier
+        synonyms:
+          - account_node_id
+          - target_id
+          - match_key
+      - name: TXN_TYPE
+        expr: TXN_TYPE
+        data_type: STRING
+        sample_values:
+          - CASH
+          - CHEQUE
+        description: Type of relationship
+        synonyms:
+          - relationship_type
+          - link_type
+          - connection_type
+      - name: PROPS
+        expr: PROPS
+        data_type: VARIANT
+        description: Additional relationship properties
+        synonyms:
+          - properties
+          - attributes
+          - metadata
+    time_dimensions:
+      - name: EFFECTIVE_START
+        expr: EFFECTIVE_START
+        data_type: DATE
+        description: Start date of the relationship
+        synonyms:
+          - start_date
+          - begin_date
+          - relationship_start
+      - name: EFFECTIVE_END
+        expr: EFFECTIVE_END
+        data_type: DATE
+        description: End date of the relationship
+        synonyms:
+          - end_date
+          - expiry_date
+          - relationship_end
+    facts:
+      - name: TXN_FEATURES
+        expr: TXN_FEATURES
+        data_type: STRING
+        description: Relationship weight
+        synonyms:
+          - relationship_weight
+          - edge_weight
+          - connection_strength
+    primary_key:
+      columns:
+        - TXN_ID
+        - ACCOUNT_ID
+        - EFFECTIVE_START
+
+relationships:
+  # =====================================================
+  # CUSTOMER, ACCOUNT, TRANSACTION, DEVICE RELATIONSHIPS
+  # =====================================================
+  - name: CustomertoAccount_Relationship
+    left_table: V_ACCOUNT
+    right_table: V_CUSTOMER
+    relationship_columns:
+      - left_column: ACCOUNT_ID
+        right_column: NODE_ID
+    join_type: left_outer
+    relationship_type: one_to_many
+
+  - name: CustomertoDevice_Relationships
+    left_table: V_DEVICE
+    right_table: V_CUSTOMER
+    relationship_columns:
+      - left_column: DEVICE_ID
+        right_column: NODE_ID
+    join_type: left_outer
+    relationship_type: one_to_one
+
+  - name: CustomertoTransaction_Relationships
+    left_table: V_TRANSACTION
+    right_table: V_CUSTOMER
+    relationship_columns:
+      - left_column: TXN_ID
+        right_column: NODE_ID
+    join_type: left_outer
+    relationship_type: one_to_many
+
+  - name: AccounttoTransaction_Relationships
+    left_table: V_TRANSACTION
+    right_table: V_TRANSACTION
+    relationship_columns:
+      - left_column: TXN_ID
+        right_column: NODE_ID
+    join_type: left_outer
+    relationship_type: one_to_many
+
+# =====================================================
+# METRICS - Pre-defined aggregations for Cortex Analyst
+# =====================================================
+metrics:
+  - name: total_accounts
+    expr: COUNT(DISTINCT ACCOUNT_ID)
+    data_type: NUMBER
+    description: "Total number of unique accounts for a customer"
+    synonyms:
+      - account_count
+      - number_of_accounts
+
+  - name: total_product_transactions
+    expr: COUNT(DISTINCT ACCOUNT_ID)
+    data_type: NUMBER
+    description: "Total number of unique transactions involving products"
+    synonyms:
+      - product_transaction_count
+      - number_of_product_transactions
+
+  - name: total_customer_transactions
+    expr: COUNT(DISTINCT CUSTOMER_ID)
+    data_type: NUMBER
+    description: "Total number of unique transactions involving customers"
+    synonyms:
+      - customer_transaction_count
+      - number_of_customer_transactions
+
+#WE CAN ADD AS MANY MORE WE WANT, AVG, COUNT(DIRECT RELATIONSHIP), COUNT(INDIRECT RELATIONSHIP)
+# =====================================================
+# FILTERS - Named WHERE clauses for common patterns
+# =====================================================
+filters:
+  - name: active_customers
+    expr: "EFFECTIVE_END IS NULL OR EFFECTIVE_END >= CURRENT_DATE()"
+    description: "Filter for currently active customers (not expired)"
+    synonyms:
+      - current_customers
+      - valid_customers
+
+  - name: active_products
+    expr: "EFFECTIVE_END IS NULL OR EFFECTIVE_END >= CURRENT_DATE()"
+    description: "Filter for currently active products (not expired)"
+    synonyms:
+      - current_products
+      - valid_products
+
+  - name: active_customer_product_relationships
+    expr: "EFFECTIVE_END IS NULL OR EFFECTIVE_END >= CURRENT_DATE()"
+    description: "Filter for currently active customer-product relationships (not expired)"
+    synonyms:
+      - current_customer_product_relationships
+      - valid_customer_product_relationships
+
+  - name: active_customer_device_relationships
+    expr: "EFFECTIVE_END IS NULL OR EFFECTIVE_END >= CURRENT_DATE()"
+    description: "Filter for currently active customer-device relationships (not expired)"
+    synonyms:
+      - current_customer_device_relationships
+      - valid_customer_device_relationships
+
+verified_queries:
+  # LEVEL 1: Basic Queries (Cortex Analyst - SQL-based)
+  - name: current_customer_product_analysis_v2
+    question: What is the current customer product relationship?
+    use_as_onboarding_question: true
+    sql: |
+      SELECT 
+        p.POSITION, 
+        p.NATIONALITY, 
+        p.NAME, 
+        pf.JERSEY_NUMBER, 
+        pf.EFFECTIVE_START as start_date
+      FROM V_PLAYER p 
+      JOIN V_PLAYS_FOR pf ON p.NODE_ID = pf.PLAYER_ID 
+      JOIN V_CLUB c ON pf.CLUB_ID = c.NODE_ID 
+      WHERE c.NAME = 'Real Madrid' 
+        AND (pf.EFFECTIVE_END IS NULL OR pf.EFFECTIVE_END >= CURRENT_DATE())
+      ORDER BY p.POSITION, p.NAME
+    verified_by: Soccer Knowledge Graph Model V2
+    verified_at: 1747672000
+
+  # LEVEL 2: Intermediate Queries (Cortex Analyst - SQL-based)
+  # LEVEL 3: Advanced SQL Queries (Cortex Analyst - Complex SQL)
+  # LEVEL 4: Expert SQL Queries (Cortex Analyst - Complex Analytics)
+  # LEVEL 5: Recursive CTE Queries (Cortex Analyst - Graph Traversal with SQL)
+  # LEVEL 6: Advanced Graph Traversal Queries (Cortex Analyst - Complex Graph Operations)
+  
+  # =====================================================
+  # SINGLE TABLE QUERIES (V_CUSTOMER only)
+  # =====================================================
+  # ==========================================================
+  # TWO-TABLE JOINS (V_CUSTOMER + v_ACCOUNT + v_TRANSACTION)
+  # ==========================================================
+   # =====================================================
+  # COMPLEX MULTI-JOIN QUERIES (Multiple relationships)
+  # =====================================================
+  # =====================================================
+  # MULTIPLE-HOP QUERIES (Graph traversal)
+  # =====================================================
+  # =====================================================
+  # SELF-JOIN QUERIES (Same table multiple times)
+  # =====================================================
+
+custom_instructions: |-
+  This is a Knowledge Graph semantic model with node-edge architecture for customer,account,transaction & device data.
+  
+  ENTITY TABLES (nodes):
+  - V_CUSTOMER: Customer entities with NODE_ID as primary key
+  - V_ACCOUNT: Account entities with NODE_ID as primary key
+  - V_TRANSACTION: Transaction entities with NODE_ID as primary key
+  - V_DEVICE: Device entities with NODE_ID as primary key
+  
+  RELATIONSHIP TABLES (edges):
+  - V_CUST_PRODUCT_OWNED : Customer-to-Product relationships (CUSTOMER_ID -> PRODUCT_ID)
+  - V_CUST_ACCOUNT_OWNED: Customer-to-Account relationships (CUSTOMER_ID -> ACCOUNT_ID)
+  - V_ACCOUNT_TRANSACTION: Account-to-Transaction relationships (ACCOUNT_ID -> TRANSACTION_ID)
+  - V_CUST_DEVICE_OWNED: Customer-to-Device relationships (CUSTOMER_ID -> DEVICE_ID)
+
+  TEMPORAL FILTERING:
+  - For "current" or "active" queries: EFFECTIVE_END IS NULL OR EFFECTIVE_END >= CURRENT_DATE()
+  - Include all historical data unless specifically asking for current/active information
+  
+  JOIN PATTERNS:
+  - Always join entities through relationship tables, not directly
+  
+  QUERY BEST PRACTICES:
+  - Use NODE_ID columns to join entity tables with relationship tables
+  - For customer insights: join V_CUSTOMER -> V_CUST_ACCOUNT_OWNED -> V_ACCOUNT
+  - For product analysis: join entity -> relationship view (V_CUST_PRODUCT_OWNED)
+  - Focus on active relationships and recent transactions unless specifically asked about historical data
+  - When analyzing customer behavior, prioritize current/active relationships unless historical analysis is requested
+
+module_custom_instructions:
+  sql_generation: |-
+    Knowledge Graph SQL Generation Rules:
+    1. Entity tables use NODE_ID as primary key
+    2. Relationship tables use SRC_ID and DST_ID 
+    3. For temporal queries, always check EFFECTIVE_START and EFFECTIVE_END
+    4. Use the pre-defined filters when applicable
+    5. Use the pre-defined metrics For aggregations
+    6. For head-to-head analysis: join entity -> relationship view -> entity for both sides of the comparison
